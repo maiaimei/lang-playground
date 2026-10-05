@@ -1,4 +1,6 @@
-// 字面量创建对象
+// 创建对象的三种方式
+
+// 方式一：字面量创建对象
 var eason = {
   name: "陈奕迅",
   sex: "男",
@@ -7,7 +9,7 @@ var eason = {
   },
 };
 
-// new Object()创建对象
+// 方式二：new Object()创建对象
 var jay = new Object();
 jay.name = "周杰伦";
 jay.sex = "男";
@@ -15,7 +17,7 @@ jay.sing = function (song) {
   console.log(song);
 };
 
-// 构造函数创建对象
+// 方式三：构造函数创建对象
 function Star(name, sex) {
   this.name = name;
   this.sex = sex;

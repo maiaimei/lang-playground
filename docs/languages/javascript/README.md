@@ -1,7 +1,3 @@
-https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference
-
-https://www.runoob.com/js/js-tutorial.html
-
 # ECMAScript规范
 
 ES规范就是ECMAScript规范，它是JavaScript语言的国际标准化规范，由Ecma International通过ECMA-262标准制定和维护。
@@ -36,3 +32,9 @@ ES规范从2015年起改为每年发布一个新版本，用“年份+版本号�
 - 日常开发：目前ES6+已成为前端项目的默认语法标准，Vue、React、Webpack等现代工程体系均基于此。
 - 兼容性处理：新特性存在浏览器兼容问题，生产环境建议用Babel转译成ES5，可通过`@babel/preset-env`统一处理。
 - 学习路径：想深入理解规范细节，可先掌握ES6基础（let/const、箭头函数、解构、模块化），再按版本增量学习新特性。
+
+# JavaScript 参考
+
+[https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference)
+
+[https://www.runoob.com/js/js-tutorial.html](https://www.runoob.com/js/js-tutorial.html)

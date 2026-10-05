@@ -12,7 +12,6 @@
 | **变量提升**       | ✅ 有（会初始化为 `undefined`） | ✅ 有（但存在 TDZ） | ✅ 有（但存在 TDZ）     |
 | **暂时性死区（TDZ）**     | ❌ 无                           | ✅ 有               | ✅ 有                   |
 | **挂载到全局对象**   | ✅ 挂载到 `window`              | ❌ 不挂载           | ❌ 不挂载               |
-| 推荐程度       | ❌ 不推荐                       | ✅ 变量首选         | ✅ 常量首选             |
 
 ## 使用建议
 
@@ -56,6 +55,7 @@ function example() {
 ## 重复声明
 
 ### 规则
+
 - **`var`**：
   - 允许在同一作用域内重复声明变量。
 - **`let` / `const`**：
@@ -65,18 +65,21 @@ function example() {
 ### 示例代码
 
 #### `var` 允许重复声明
+
 ```javascript
 var a = 1;
 var a = 2; // ✅
 ```
 
 #### `let` 不允许重复声明
+
 ```javascript
 let a = 1;
 let a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
 ```
 
 #### `const` 不允许重复声明
+
 ```javascript
 const a = 1;
 const a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
@@ -85,6 +88,7 @@ const a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
 ## 重新赋值
 
 ### 规则
+
 - **`var` 和 `let`**：
   - 声明的变量可以重新赋值。
 - **`const`**：
@@ -94,6 +98,7 @@ const a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
 ### 示例代码
 
 #### `var` 和 `let` 可以重新赋值
+
 ```javascript
 var a = 1;
 a = 2; // ✅
@@ -103,17 +108,21 @@ b = 2; // ✅
 ```
 
 #### `const` 不能重新赋值
+
 ```javascript
 const c = 1;
 c = 2; // ❌ TypeError: Assignment to constant variable.
 ```
 
 #### `const` 对象的特殊性
+
 ```javascript
 const obj = { name: 'Tom' };
 obj.name = 'Jerry'; // ✅ 修改对象内容
 obj = {};           // ❌ TypeError: Assignment to constant variable.
 ```
+
+解析：
 
 - **对象内容可变**：`const` 声明的对象可以修改其属性值。
 - **引用地址不可变**：尝试重新赋值会抛出 `TypeError`。
@@ -130,7 +139,7 @@ obj = {};           // ❌ TypeError: Assignment to constant variable.
 **`let` / `const`**：
 
 - 声明会被提升，但在初始化之前不可访问。
-- 这种行为称为 **暂时性死区/临时死区（Temporal Dead Zone, TDZ）**。**TDZ** 是 let/const 最重要的安全机制之一。
+- 这种行为称为 **暂时性死区/临时死区（Temporal Dead Zone, TDZ）**。**TDZ** 是 `let`/`const` 最重要的安全机制之一。
 
 ### 示例代码
 
@@ -213,6 +222,7 @@ for (let i = 0; i < 3; i++) {
 ## 全局对象行为
 
 ### 规则
+
 - **`var`**：
   - 声明的变量会挂载到全局对象（如浏览器中的 `window`）。
 - **`let` 和 `const`**：
@@ -221,12 +231,14 @@ for (let i = 0; i < 3; i++) {
 ### 示例代码
 
 #### `var` 挂载到全局对象
+
 ```javascript
 var a = 1;
 console.log(window.a); // 1
 ```
 
 #### `let` 和 `const` 不挂载到全局对象
+
 ```javascript
 let a = 1;
 console.log(window.a); // undefined
@@ -314,4 +326,3 @@ Symbol 不是为了存数据，而是为了给“属性名”上一把不会撞�
 - 每次调用都返回**全新且唯一的值**
 - 描述（description）仅用于调试，不影响唯一性
 - 常用于对象属性键
-

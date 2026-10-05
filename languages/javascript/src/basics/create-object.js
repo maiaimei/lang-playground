@@ -20,6 +20,11 @@ function Star(name) {
     console.log(song);
   };
 }
+// new的执行流程:
+// 1.在内存中创建一个新的空对象
+// 2.让 this 指向这个新的对象
+// 3.执行构造函数里面的代码，给这个新的对象添加属性和方法
+// 4.返回这个新的对象(构造函数不需要return)
 var rene = new Star("刘若英");
 var emil = new Star("周华健");
 

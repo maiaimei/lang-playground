@@ -21,233 +21,147 @@
 
 ## 作用域差异
 
+**函数作用域**：变量的存活范围 = 声明它的最内层函数体。
+
+**块级作用域**：变量的存活范围 = 声明它的最内层 `{}` 代码块。
+
 ### 规则
 
-JavaScript 中 `var`、`let` 和 `const` 的作用域存在显著差异：
+- **`var`**：函数作用域，可穿透 `if` / `for` / `while` 等块级结构。用 `var` 声明的变量，其可见范围由**最靠近它的那个 `function () {}`** 决定。只要在这个函数体内部，无论嵌套多少层 `if` / `for` / `while` / 裸块 `{}`，都能访问到它；一旦函数执行完毕，变量就随之销毁。**作用域边界是 `function` 的花括号，不是任意 `{}`。**
+- **`let` / `const`**：块级作用域，仅在 `{}` 内有效。用 `let` / `const` 声明的变量，其可见范围由**包裹它的最近一对花括号 `{}`**（可以是 `if`、`for`、`while`、switch，甚至独立的 `{ }`）决定。出了这层 `{}` 立刻不可访问，且访问前处于暂时性死区（TDZ）。**任何 `{}` 都是一道边界**，变量生命周期严格锁死在这个块内。
 
-- **`var`**：函数作用域，变量可以穿透 `if` / `for` / `while` 等块级结构。
-- **`let` / `const`**：块级作用域，仅在 `{}` 内有效。
-
-### 示例代码
+### 示例
 
 ```javascript
-function example() {
+function fn() {
     if (true) {
-        var a = 1;
+        var a = 1; // 看起来在 if 里，其实还是 fn 的变量
         let b = 2;
         const c = 3;
 
-        console.log(a); // 1
-        console.log(b); // 2
-        console.log(c); // 3
+        console.log(a, b, c); // 1 2 3
     }
     console.log(a); // 1
     console.log(b); // ReferenceError: b is not defined
     console.log(c); // ReferenceError: c is not defined
 }
+fn();
 ```
 
-解析：
+### 解析
 
-- `var` 声明的变量 `a` 在函数作用域内有效，因此可以在 `if` 块外访问。
-- `let` 和 `const` 声明的变量 `b` 和 `c` 仅在 `if` 块内有效，块外访问会抛出 `ReferenceError`。
+- `var a` 提升到函数作用域，块外仍可访问。
+- `let b` / `const c` 仅存活于 `if` 块内，块外访问即抛 `ReferenceError`。
 
 ## 重复声明
 
 ### 规则
 
-- **`var`**：
-  - 允许在同一作用域内重复声明变量。
-- **`let` / `const`**：
-  - 不允许在同一作用域内重复声明变量。
-  - 重复声明会抛出 `SyntaxError`。
+- **`var`**：同一作用域内允许重复声明。
+- **`let` / `const`**：同一作用域内禁止重复声明，抛 `SyntaxError`。
 
-### 示例代码
-
-#### `var` 允许重复声明
+### 示例
 
 ```javascript
+// var ✅
 var a = 1;
-var a = 2; // ✅
-```
+var a = 2;
 
-#### `let` 不允许重复声明
+// let ❌
+let b = 1;
+let b = 2; // SyntaxError: Identifier 'b' has already been declared
 
-```javascript
-let a = 1;
-let a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
-```
-
-#### `const` 不允许重复声明
-
-```javascript
-const a = 1;
-const a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
+// const ❌
+const c = 1;
+const c = 2; // SyntaxError: Identifier 'c' has already been declared
 ```
 
 ## 重新赋值
 
 ### 规则
 
-- **`var` 和 `let`**：
-  - 声明的变量可以重新赋值。
-- **`const`**：
-  - 声明的变量不能重新赋值。
-  - 如果是对象，引用地址不可变，但对象的内容是可变的。
+- **`var` / `let`**：可重新赋值。
+- **`const`**：不可重新赋值；若值为对象，**引用地址不可变，但对象内部属性可修改**。
 
-### 示例代码
+### 示例
 
-#### `var` 和 `let` 可以重新赋值
-
-```javascript
-var a = 1;
-a = 2; // ✅
-
-let b = 1;
-b = 2; // ✅
 ```
+var a = 1; a = 2;        // ✅
+let b = 1; b = 2;        // ✅
 
-#### `const` 不能重新赋值
-
-```javascript
 const c = 1;
-c = 2; // ❌ TypeError: Assignment to constant variable.
-```
+c = 2;                   // ❌ TypeError: Assignment to constant variable.
 
-#### `const` 对象的特殊性
-
-```javascript
 const obj = { name: 'Tom' };
-obj.name = 'Jerry'; // ✅ 修改对象内容
-obj = {};           // ❌ TypeError: Assignment to constant variable.
+obj.name = 'Jerry';       // ✅ 修改属性
+obj = {};                 // ❌ 修改引用地址
 ```
-
-解析：
-
-- **对象内容可变**：`const` 声明的对象可以修改其属性值。
-- **引用地址不可变**：尝试重新赋值会抛出 `TypeError`。
 
 ## 变量提升与暂时性死区（TDZ）
 
 ### 规则
 
-**`var`**：
+- **`var`**：声明提升，初始化前值为 `undefined`。
+- **`let` / `const`**：声明同样提升，但**初始化前不可访问**，这段区域称为 **暂时性死区（Temporal Dead Zone, TDZ）**，是 `let`/`const` 的关键安全机制。
 
-- 声明会被提升到作用域顶部。
-- 在初始化之前，变量的值为 `undefined`。
-
-**`let` / `const`**：
-
-- 声明会被提升，但在初始化之前不可访问。
-- 这种行为称为 **暂时性死区/临时死区（Temporal Dead Zone, TDZ）**。**TDZ** 是 `let`/`const` 最重要的安全机制之一。
-
-### 示例代码
-
-#### `var` 的变量提升
+### 示例
 
 ```javascript
+// var：提升后等价于 var x; 再赋值
 console.log(x); // undefined
 var x = 10;
-```
 
-等价代码（变量提升后）：
-
-```javascript
-var x;
-console.log(x); // undefined
-x = 10;
-```
-
-解析：
-
-- `var` 声明的变量 `x` 被提升到作用域顶部。
-- 在初始化之前，`x` 的值为 `undefined`。
-
-#### `let` 的暂时性死区
-
-```javascript
+// let：TDZ 内访问直接报错
 console.log(y); // ReferenceError: Cannot access 'y' before initialization
 let y = 10;
 ```
 
-解析：
+------
 
-- `let` 声明的变量 `y` 被提升，但在初始化之前不可访问。
-- 访问 `y` 时会抛出 `ReferenceError`，因为变量处于暂时性死区（TDZ）。
+## 循环中的异步陷阱（经典面试题）
 
-## 变量提升与异步执行
-
-### 示例代码
+### `var` 的问题
 
 ```javascript
 for (var i = 0; i < 3; i++) {
-    setTimeout(() => console.log(i), 0); // 输出：3 3 3
+    setTimeout(() => console.log(i), 0); // 3 3 3
 }
 ```
 
-等价代码（变量提升后）：
+**原因**：`var i` 被提升到外层作用域，三个回调共享同一个 `i`，等宏任务执行时循环已结束，`i === 3`。
 
-```javascript
-var i;
-for (i = 0; i < 3; i++) {
-    setTimeout(() => console.log(i), 0);
-}
-```
-
-解析：
-
-1. **变量提升**：`var` 声明的变量 `i` 被提升到函数作用域或全局作用域，整个循环共用同一个变量 `i`。
-2. 异步执行：
-   - `setTimeout` 是异步宏任务，回调函数会在同步代码执行完后才执行。
-   - 当回调函数执行时，循环已经结束，`i` 的值为 `3`。
-3. **输出结果**：三个回调函数均打印 `3`。
-
-### 修复异步问题
-
-使用 let 替代 var，确保每次循环的 i 都是独立的块级作用域变量。
-
-示例代码：
+### `let` 的修复
 
 ```javascript
 for (let i = 0; i < 3; i++) {
-    setTimeout(() => console.log(i), 0); // 输出：0 1 2
+    setTimeout(() => console.log(i), 0); // 0 1 2
 }
 ```
 
-解析：
+**原因**：`let` 在每次迭代中创建独立的块级绑定，回调各自捕获当次循环的 `i`。
 
-- `let` 声明的变量 `i` 在每次循环中都是独立的块级作用域变量。
-- 每个回调函数捕获的 `i` 值是循环当时的值，因此输出 `0 1 2`。
+------
 
-## 全局对象行为
+## 全局对象挂载行为
 
 ### 规则
 
-- **`var`**：
-  - 声明的变量会挂载到全局对象（如浏览器中的 `window`）。
-- **`let` 和 `const`**：
-  - 声明的变量不会挂载到全局对象。
+- **`var`**：全局声明会挂载到全局对象（浏览器中为 `window`）。
+- **`let` / `const`**：全局声明仅存在于词法环境，**不会成为 `window` 的属性**。
 
-### 示例代码
-
-#### `var` 挂载到全局对象
+### 示例
 
 ```javascript
 var a = 1;
 console.log(window.a); // 1
+
+let b = 2;
+console.log(window.b); // undefined
 ```
 
-#### `let` 和 `const` 不挂载到全局对象
+### 解析
 
-```javascript
-let a = 1;
-console.log(window.a); // undefined
-```
-
-解析
-
-- 使用 `var` 声明的全局变量会成为全局对象（如 `window`）的属性。
-- 使用 `let` 和 `const` 声明的全局变量不会成为全局对象的属性。
+- `var` 的全局变量会污染全局对象；`let`/`const` 避免了这一副作用，更适合模块化开发。
 
 # JavaScript 数据类型
 

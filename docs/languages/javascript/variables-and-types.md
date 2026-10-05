@@ -1,21 +1,240 @@
 # JavaScript 变量声明
 
-| **特性**            | **var**                        | **let**            | **const**              |
-| :------------------ | :----------------------------- | :----------------- | :--------------------- |
-| 引入版本            | ES1（1997）                    | **ES2015（ES6）**  | **ES2015（ES6）**      |
-| 作用域              | 函数作用域                     | 块级作用域         | 块级作用域             |
-| 变量提升            | ✅ 有（会初始化为 `undefined`） | ✅ 有（但存在 TDZ） | ✅ 有（但存在 TDZ）     |
-| 重复声明            | ✅ 允许                         | ❌ 不允许           | ❌ 不允许               |
-| 全局声明挂载 window | ✅ 会                           | ❌ 不会             | ❌ 不会                 |
-| 是否可重新赋值      | ✅ 可以                         | ✅ 可以             | ❌ 不可以（引用不可变） |
-| 是否必须初始化      | ❌ 否                           | ❌ 否               | ✅ 必须                 |
-| 推荐程度            | ❌ 已淘汰                       | ✅ 变量首选         | ✅✅ 常量首选            |
+在 JavaScript 中，可以使用 **var**、**let** 和 **const** 关键字来声明变量。
 
-✅ **TDZ（Temporal Dead Zone）（临时死区）** 是 let/const 最重要的安全机制之一。
+| **特性**       | **var**                        | **let**            | **const**              |
+| :------------- | :----------------------------- | :----------------- | :--------------------- |
+| 引入版本       | 1997（ES1）                    | **ES2015（ES6）**  | **ES2015（ES6）**      |
+| 作用域         | 函数作用域                     | 块级作用域         | 块级作用域             |
+| 是否必须初始化 | ❌ 否                           | ❌ 否               | ✅ 必须                 |
+| 是否可重复声明 | ✅ 允许                         | ❌ 不允许           | ❌ 不允许               |
+| 是否可重新赋值 | ✅ 可以                         | ✅ 可以             | ❌ 不可以（引用不可变） |
+| 变量提升       | ✅ 有（会初始化为 `undefined`） | ✅ 有（但存在 TDZ） | ✅ 有（但存在 TDZ）     |
+| 暂时性死区     | ❌ 无                           | ✅ 有               | ✅ 有                   |
+| 全局对象属性   | ✅ 挂载到 `window`              | ❌ 不挂载           | ❌ 不挂载               |
+| 推荐程度       | ❌ 不推荐                       | ✅ 变量首选         | ✅ 常量首选             |
 
-📌 **const 的“不可变”是引用不可变，只保证绑定的地址不变，不保证内容不变**
+## 作用域差异
+### 规则
 
-> **var 是 ES5 的遗产，let / const 是 ES6 给工程化世界的礼物；const 优先，let 次之，var 永不使用。**
+JavaScript 中 `var`、`let` 和 `const` 的作用域存在显著差异：
+
+- **`var`**：函数作用域，变量可以穿透 `if` / `for` / `while` 等块级结构。
+- **`let` / `const`**：块级作用域，仅在 `{}` 内有效。
+
+### 示例代码
+
+```javascript
+function example() {
+    if (true) {
+        var a = 1;
+        let b = 2;
+        const c = 3;
+
+        console.log(a); // 1
+        console.log(b); // 2
+        console.log(c); // 3
+    }
+    console.log(a); // 1
+    console.log(b); // ReferenceError: b is not defined
+    console.log(c); // ReferenceError: c is not defined
+}
+```
+
+解析：
+
+- `var` 声明的变量 `a` 在函数作用域内有效，因此可以在 `if` 块外访问。
+- `let` 和 `const` 声明的变量 `b` 和 `c` 仅在 `if` 块内有效，块外访问会抛出 `ReferenceError`。
+
+## 重复声明
+
+### 规则
+- **`var`**：
+  - 允许在同一作用域内重复声明变量。
+- **`let` / `const`**：
+  - 不允许在同一作用域内重复声明变量。
+  - 重复声明会抛出 `SyntaxError`。
+
+### 示例代码
+
+#### `var` 允许重复声明
+```javascript
+var a = 1;
+var a = 2; // ✅
+```
+
+#### `let` 不允许重复声明
+```javascript
+let a = 1;
+let a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
+```
+
+#### `const` 不允许重复声明
+```javascript
+const a = 1;
+const a = 2; // ❌ SyntaxError: Identifier 'a' has already been declared
+```
+
+## 重新赋值
+
+### 规则
+- **`var` 和 `let`**：
+  - 声明的变量可以重新赋值。
+- **`const`**：
+  - 声明的变量不能重新赋值。
+  - 如果是对象，引用地址不可变，但对象的内容是可变的。
+
+### 示例代码
+
+#### `var` 和 `let` 可以重新赋值
+```javascript
+var a = 1;
+a = 2; // ✅
+
+let b = 1;
+b = 2; // ✅
+```
+
+#### `const` 不能重新赋值
+```javascript
+const c = 1;
+c = 2; // ❌ TypeError: Assignment to constant variable.
+```
+
+#### `const` 对象的特殊性
+```javascript
+const obj = { name: 'Tom' };
+obj.name = 'Jerry'; // ✅ 修改对象内容
+obj = {};           // ❌ TypeError: Assignment to constant variable.
+```
+
+- **对象内容可变**：`const` 声明的对象可以修改其属性值。
+- **引用地址不可变**：尝试重新赋值会抛出 `TypeError`。
+
+## 变量提升与暂时性死区（TDZ）
+
+### 规则
+
+**`var`**：
+
+- 声明会被提升到作用域顶部。
+- 在初始化之前，变量的值为 `undefined`。
+
+**`let` / `const`**：
+
+- 声明会被提升，但在初始化之前不可访问。
+- 这种行为称为 **暂时性死区/临时死区（Temporal Dead Zone, TDZ）**。**TDZ** 是 let/const 最重要的安全机制之一。
+
+### 示例代码
+
+#### `var` 的变量提升
+
+```javascript
+console.log(x); // undefined
+var x = 10;
+```
+
+等价代码（变量提升后）：
+
+```javascript
+var x;
+console.log(x); // undefined
+x = 10;
+```
+
+解析：
+
+- `var` 声明的变量 `x` 被提升到作用域顶部。
+- 在初始化之前，`x` 的值为 `undefined`。
+
+#### `let` 的暂时性死区
+
+```javascript
+console.log(y); // ReferenceError: Cannot access 'y' before initialization
+let y = 10;
+```
+
+解析：
+
+- `let` 声明的变量 `y` 被提升，但在初始化之前不可访问。
+- 访问 `y` 时会抛出 `ReferenceError`，因为变量处于暂时性死区（TDZ）。
+
+## 变量提升与异步执行
+
+### 示例代码
+
+```javascript
+for (var i = 0; i < 3; i++) {
+    setTimeout(() => console.log(i), 0); // 输出：3 3 3
+}
+```
+
+等价代码（变量提升后）：
+
+```javascript
+var i;
+for (i = 0; i < 3; i++) {
+    setTimeout(() => console.log(i), 0);
+}
+```
+
+解析：
+
+1. **变量提升**：`var` 声明的变量 `i` 被提升到函数作用域或全局作用域，整个循环共用同一个变量 `i`。
+2. 异步执行：
+   - `setTimeout` 是异步宏任务，回调函数会在同步代码执行完后才执行。
+   - 当回调函数执行时，循环已经结束，`i` 的值为 `3`。
+3. **输出结果**：三个回调函数均打印 `3`。
+
+### 修复异步问题
+
+使用 let 替代 var，确保每次循环的 i 都是独立的块级作用域变量。
+
+示例代码：
+
+```javascript
+for (let i = 0; i < 3; i++) {
+    setTimeout(() => console.log(i), 0); // 输出：0 1 2
+}
+```
+
+解析：
+
+- `let` 声明的变量 `i` 在每次循环中都是独立的块级作用域变量。
+- 每个回调函数捕获的 `i` 值是循环当时的值，因此输出 `0 1 2`。
+
+## 全局对象行为
+
+### 规则
+- **`var`**：
+  - 声明的变量会挂载到全局对象（如浏览器中的 `window`）。
+- **`let` 和 `const`**：
+  - 声明的变量不会挂载到全局对象。
+
+### 示例代码
+
+#### `var` 挂载到全局对象
+```javascript
+var a = 1;
+console.log(window.a); // 1
+```
+
+#### `let` 和 `const` 不挂载到全局对象
+```javascript
+let a = 1;
+console.log(window.a); // undefined
+```
+
+解析
+
+- 使用 `var` 声明的全局变量会成为全局对象（如 `window`）的属性。
+- 使用 `let` 和 `const` 声明的全局变量不会成为全局对象的属性。
+
+## 使用原则
+
+1. 默认使用 `const`
+2. 需要重新赋值时使用 `let`
+3. 禁止使用 `var`
 
 # JavaScript 数据类型
 

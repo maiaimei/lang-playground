@@ -21,14 +21,10 @@
 
 ## 作用域差异
 
-**函数作用域**：变量的存活范围 = 声明它的最内层函数体。
-
-**块级作用域**：变量的存活范围 = 声明它的最内层 `{}` 代码块。
-
 ### 规则
 
-- **`var`**：函数作用域，可穿透 `if` / `for` / `while` 等块级结构。用 `var` 声明的变量，其可见范围由**最靠近它的那个 `function () {}`** 决定。只要在这个函数体内部，无论嵌套多少层 `if` / `for` / `while` / 裸块 `{}`，都能访问到它；一旦函数执行完毕，变量就随之销毁。**作用域边界是 `function` 的花括号，不是任意 `{}`。**
-- **`let` / `const`**：块级作用域，仅在 `{}` 内有效。用 `let` / `const` 声明的变量，其可见范围由**包裹它的最近一对花括号 `{}`**（可以是 `if`、`for`、`while`、switch，甚至独立的 `{ }`）决定。出了这层 `{}` 立刻不可访问，且访问前处于暂时性死区（TDZ）。**任何 `{}` 都是一道边界**，变量生命周期严格锁死在这个块内。
+- **`var`**：**函数作用域**，变量的存活范围 = 声明它的最内层函数体。`if` / `for` / `while` / 裸 `{}` 都拦不住它，函数内任意位置均可访问；函数执行结束，变量随即销毁；作用域边界是 `function` 的花括号，不是任意 `{}`。
+- **`let` / `const`**：**块级作用域**，变量的存活范围 = 声明它的最内层 `{}` 代码块。可以是 `if`、`for`、`while`、switch，甚至独立的 `{ }`。出了这层 `{}` 立刻不可访问，且访问前处于暂时性死区（TDZ）。任何 `{}` 都是一道边界，变量生命周期严格锁死在这个块内。
 
 ### 示例
 
@@ -48,7 +44,7 @@ function fn() {
 fn();
 ```
 
-### 解析
+解析：
 
 - `var a` 提升到函数作用域，块外仍可访问。
 - `let b` / `const c` 仅存活于 `if` 块内，块外访问即抛 `ReferenceError`。
@@ -85,7 +81,7 @@ const c = 2; // SyntaxError: Identifier 'c' has already been declared
 
 ### 示例
 
-```
+```javascript
 var a = 1; a = 2;        // ✅
 let b = 1; b = 2;        // ✅
 
@@ -99,6 +95,8 @@ obj = {};                 // ❌ 修改引用地址
 
 ## 变量提升与暂时性死区（TDZ）
 
+**变量提升**：代码正式执行前，JS 引擎会先扫描当前作用域，把 `var`/`function` 的声明（以及 `let`/`const` 的变量绑定）统一提到作用域顶部，但只“只挪声明，不挪赋值”，等到真正执行到赋值语句时才补上具体的值。
+
 ### 规则
 
 - **`var`**：声明提升，初始化前值为 `undefined`。
@@ -106,17 +104,61 @@ obj = {};                 // ❌ 修改引用地址
 
 ### 示例
 
-```javascript
-// var：提升后等价于 var x; 再赋值
-console.log(x); // undefined
-var x = 10;
+#### `var` 声明提升
 
-// let：TDZ 内访问直接报错
+```javascript
+console.log(x); // undefined  ← 没报错！
+var x = 10;
+```
+
+引擎实际干的事相当于：
+
+```javascript
+var x;        	// 声明被“提升”到顶部
+console.log(x); // undefined（有声明没赋值）
+x = 10;       	// 赋值留在原处
+```
+
+#### `let` 声明提升
+
+```javascript
 console.log(y); // ReferenceError: Cannot access 'y' before initialization
 let y = 10;
 ```
 
-------
+引擎实际干的事相当于：
+
+```javascript
+let y;
+console.log(y); // ReferenceError: Cannot access 'y' before initialization
+y = 10;
+```
+
+#### 函数声明提升
+
+```javascript
+foo(); // ✅ 直接能跑
+function foo() {
+    console.log('hi');
+}
+```
+
+函数声明会把**整个函数体**一起提升上去，所以调用写在前面也能跑。
+
+但函数表达式不行：
+
+```javascript
+bar(); // ❌ TypeError: bar is not a function
+var bar = function () { console.log('hi'); };
+```
+
+引擎实际干的事相当于：
+
+```javascript
+var bar;
+bar(); // ❌ TypeError: bar is not a function
+bar = function () { console.log('hi'); };
+```
 
 ## 循环中的异步陷阱（经典面试题）
 
@@ -140,8 +182,6 @@ for (let i = 0; i < 3; i++) {
 
 **原因**：`let` 在每次迭代中创建独立的块级绑定，回调各自捕获当次循环的 `i`。
 
-------
-
 ## 全局对象挂载行为
 
 ### 规则
@@ -159,7 +199,7 @@ let b = 2;
 console.log(window.b); // undefined
 ```
 
-### 解析
+解析：
 
 - `var` 的全局变量会污染全局对象；`let`/`const` 避免了这一副作用，更适合模块化开发。
 

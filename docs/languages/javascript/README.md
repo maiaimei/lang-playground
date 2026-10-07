@@ -35,6 +35,6 @@ ES规范从2015年起改为每年发布一个新版本，用“年份+版本号�
 
 # JavaScript 参考
 
-[https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference)
+[https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide)
 
 [https://www.runoob.com/js/js-tutorial.html](https://www.runoob.com/js/js-tutorial.html)

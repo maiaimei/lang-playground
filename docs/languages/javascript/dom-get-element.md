@@ -1,95 +1,167 @@
-在 JavaScript 中，获取 DOM 元素是进行页面交互的基础。根据选择条件的不同（ID、类名、标签、CSS 选择器等），主要有以下 6 种核心方式。
+# JavaScript 获取 DOM 元素
 
----
+在 JavaScript 中，获取 DOM 元素是操作页面、实现交互的基础。根据选择条件（ID、类名、标签、CSS 选择器等），核心共 6 种获取方式，可分为**获取单个元素**与**获取元素集合**两大类。
 
-一、 获取单个元素（返回 Element 或 null）
+> 补充前置知识：所有获取 DOM 的方法，都依赖 `document` 对象（当前 HTML 文档的入口）；部分方法也可以挂载到某个父元素下，实现**局部范围查找**，例如 `parentElement.querySelector('.child')`，缩小查询范围，提升性能。
 
-如果你确定目标元素是唯一的，或者只需要操作第一个匹配项，使用以下方法：
+## 一、获取单个元素（返回 Element 或 null）
 
-1. `document.getElementById(id)`
-*   用法：`const el = document.getElementById('header');`
-*   特点：
-    *   性能最高：浏览器内部通过哈希表查找，速度极快。
-    *   唯一性：HTML 标准规定 ID 应唯一。如果页面有多个相同 ID，只返回第一个。
-    *   返回值：匹配的 `Element` 对象；未找到返回 `null`。
-*   适用场景：精准定位页面中具有唯一标识的元素（如主容器、特定按钮）。
+**适用场景**：目标元素唯一，或只需要拿到匹配到的第一个元素。
 
-2. `document.querySelector(selector)`
-*   用法：`const el = document.querySelector('.btn-primary');`
-*   特点：
-    *   灵活强大：支持所有 CSS 选择器（ID ``、类 `.`、标签、属性 `[attr]`、伪类 `:first-child` 等）。
-    *   只取第一个：即使有多个匹配项，也只返回文档流中的第一个。
-    *   返回值：匹配的 `Element` 对象；未找到返回 `null`。
-*   适用场景：现代开发首选。适用于复杂选择逻辑，或不需要批量操作的场景。
+### 1. `document.getElementById(id)`
 
----
+```javascript
+const el = document.getElementById('header');
+```
 
-二、 获取元素集合（返回类数组对象）
+- **特点**
+  - 性能最高：浏览器内部通过哈希表直接查找，无需解析选择器，速度最快。
+  - 唯一性约束：HTML 规范规定 `id` 在页面内应当唯一；若存在多个相同 id，仅返回文档中第一个匹配元素。
+  - 返回值：匹配到的 `Element`；未匹配到返回 `null`。
+- **适用场景**：精准定位带唯一 id 的元素，如页面主容器、核心按钮、弹窗根节点。
+- **补充**：只支持在 `document` 上调用，不能挂载到普通元素上使用。
 
-如果需要操作一组元素，使用以下方法。注意它们的返回值不是真正的数组，而是类数组对象（伪数组）。
+### 2. `document.querySelector(selector)`
 
-3. `document.getElementsByClassName(className)`
-*   用法：`const els = document.getElementsByClassName('item');`
-*   特点：
-    *   动态集合 (Live)：返回 `HTMLCollection`。当 DOM 结构变化（如新增/删除带有该类名的元素）时，集合会自动更新。
-    *   多类名支持：可以传入多个类名，如 `getElementsByClassName('box active')`，表示同时拥有这两个类的元素。
-    *   返回值：`HTMLCollection`；未找到返回空集合（长度为 0）。
-*   适用场景：需要实时反映 DOM 变化的同类元素集合。
+```javascript
+const el = document.querySelector('.btn-primary');
+const firstInput = document.querySelector('form input[type="text"]');
+```
 
-4. `document.getElementsByTagName(tagName)`
-*   用法：`const els = document.getElementsByTagName('div');`
-*   特点：
-    *   动态集合 (Live)：返回 `HTMLCollection`。DOM 变化时集合自动更新。
-    *   通配符：支持传入 `'*'` 获取所有元素。
-    *   返回值：`HTMLCollection`；未找到返回空集合。
-*   适用场景：批量操作特定标签（如重置所有 `<input>` 的值）。
+- **特点**
+  - 灵活强大：支持**所有 CSS 选择器**，id、类、标签、属性、伪类、后代选择器全部可用。
+  - 只返回第一个：无论有多少匹配项，仅返回 DOM 树中第一个符合条件的元素。
+  - 返回值：匹配到的 `Element`；未匹配到返回 `null`。
+  - 支持局部查询：可以挂载到任意父元素，只在该父元素后代中查找。
+- **适用场景**：现代 JS 开发单元素获取首选，适合复杂选择逻辑、不需要批量操作的情况。
 
-5. `document.getElementsByName(name)`
-*   用法：`const els = document.getElementsByName('gender');`
-*   特点：
-    *   表单专用：主要依据 `name` 属性匹配，常用于单选框（Radio）、复选框等表单元素。
-    *   动态集合：返回 `NodeList`（在大多数现代浏览器中是动态的）。
-    *   返回值：`NodeList`；未找到返回空集合。
-*   适用场景：处理表单中的一组同名元素。
+## 二、获取元素集合（返回类数组对象）
 
-6. `document.querySelectorAll(selector)`
-*   用法：`const els = document.querySelectorAll('.item');`
-*   特点：
-    *   静态集合 (Static)：返回 `NodeList`。快照式获取，DOM 后续的变化不会影响该集合。
-    *   灵活强大：支持所有 CSS 选择器。
-    *   可遍历：原生支持 `forEach` 方法（旧版 IE 不支持，但现代浏览器均支持）。
-    *   返回值：`NodeList`；未找到返回空集合。
-*   适用场景：现代开发中批量获取元素的首选。适合不需要实时同步 DOM 变化的场景，代码更稳定，不易因 DOM 变动导致索引错乱。
+**适用场景**：需要批量拿到一组元素。⚠️ 返回值均为**类数组（伪数组）**，不是真正的数组，不能直接使用 `map`、`filter` 等数组方法。
 
----
+### 1. `document.getElementsByClassName(className)`
 
-三、 核心差异对比与选型指南
+```javascript
+const els = document.getElementsByClassName('item');
+// 匹配同时拥有 box 和 active 两个类的元素
+const multiClassEls = document.getElementsByClassName('box active');
+```
 
-| 方法 | 返回值类型 | 动态/静态 | 支持 CSS 选择器 | 未找到返回 | 推荐指数 |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `getElementById` | `Element` | - | ❌ | `null` | ⭐⭐⭐⭐⭐ (ID 查询最快) |
-| `querySelector` | `Element` | - | ✅ | `null` | ⭐⭐⭐⭐⭐ (单元素首选) |
-| `getElementsByClassName` | `HTMLCollection` | 动态 | ❌ | 空集合 | ⭐⭐⭐ (需实时同步时用) |
-| `getElementsByTagName` | `HTMLCollection` | 动态 | ❌ | 空集合 | ⭐⭐⭐ (按标签批量时用) |
-| `getElementsByName` | `NodeList` | 动态 | ❌ | 空集合 | ⭐⭐ (仅限表单) |
-| `querySelectorAll` | `NodeList` | 静态 | ✅ | 空集合 | ⭐⭐⭐⭐⭐ (批量首选) |
+- **特点**
+  - 动态集合（Live）：返回 `HTMLCollection`。DOM 结构发生变化（新增、删除带该类名的元素）时，集合会自动更新。
+  - 多类名：传入多个类名用空格分隔，表示同时具备这些类的元素。
+  - 返回值：匹配到的 `HTMLCollection`；无匹配则返回空集合（length 为 0）。
+- **适用场景**：需要实时跟随 DOM 变化，操作一批同类元素。
 
-💡 避坑与建议
+### 2. `document.getElementsByTagName(tagName)`
 
-1.  动态 vs 静态陷阱：
-    *   `getElementsBy...` 返回的是动态集合。如果你在循环中修改 DOM（例如删除元素），集合的长度和内容会实时变化，可能导致循环跳过元素或报错。
-    *   `querySelectorAll` 返回的是静态集合，更像是一个快照，遍历时更安全。
+```javascript
+const divs = document.getElementsByTagName('div');
+// 获取页面全部元素
+const allEls = document.getElementsByTagName('*');
+```
 
-2.  伪数组转真数组：
-    *   `HTMLCollection` 和 `NodeList` 都不是真正的 Array，不能直接使用 `map`、`filter` 等方法。
-    *   如果需要数组方法，可以使用 `Array.from(els)` 或 `[...els]` 将其转换为真数组。
-    *   *注：现代浏览器中 `NodeList` 已支持 `forEach`，但 `HTMLCollection` 仍不支持。*
+- **特点**
+  - 动态集合（Live）：返回 `HTMLCollection`，DOM 变化会自动同步到集合。
+  - 支持通配符 `*`：可获取文档内所有元素。
+  - 返回值：`HTMLCollection`；无匹配返回空集合。
+- **适用场景**：批量处理某一类标签，例如重置所有 `input`、批量修改所有 `img` 属性。
 
-3.  性能考量：
-    *   如果已知元素 ID，务必使用 `getElementById`，它的性能远高于 `querySelector('id')`，因为后者需要解析选择器字符串。
-    *   在大型文档中，避免使用过于复杂的 CSS 选择器（如 `div > ul li:nth-child(2) .span`），这会降低 `querySelector` 系列的查询速度。
+### 3. `document.getElementsByName(name)`
 
-4.  现代开发推荐：
-    *   单元素：优先用 `querySelector`。
-    *   多元素：优先用 `querySelectorAll`。
-    *   极致性能/老项目兼容：保留 `getElementById` 和 `getElementsByClassName`。
+```
+const radios = document.getElementsByName('gender');
+```
+
+- **特点**
+  - 表单场景专用：依据 `name` 属性匹配元素，多用于单选框、复选框、表单字段。
+  - 动态集合：返回 `NodeList`，DOM 变化会同步更新集合。
+  - 返回值：`NodeList`；无匹配返回空集合。
+- **适用场景**：处理表单内一组同名表单控件，获取选中的单选/复选值。
+
+### 4. `document.querySelectorAll(selector)`
+
+```javascript
+const items = document.querySelectorAll('.list .item');
+```
+
+- **特点**
+  - 静态集合（Static）：返回 `NodeList`，属于快照。DOM 后续新增、删除元素，**不会**改变已经拿到的这个集合。
+  - 支持全部 CSS 选择器，同样支持局部查询。
+  - 原生支持 `forEach` 遍历（现代浏览器）。
+  - 返回值：`NodeList`；无匹配返回空集合。
+- **适用场景**：现代开发批量获取 DOM 的首选；适合不需要实时同步 DOM 的场景，遍历、操作更安全，不容易因为 DOM 变动出现索引错乱。
+
+## 三、核心差异对比与选型指南
+
+| 方法                     | 返回值类型       | 动态 / 静态 | 支持 CSS 选择器 | 未找到返回值 | 推荐指数 | 备注                                |
+| ------------------------ | ---------------- | ----------- | --------------- | ------------ | -------- | ----------------------------------- |
+| `getElementById`         | `Element`        | -           | ❌               | `null`       | ⭐⭐⭐⭐⭐    | id 查询性能最优，仅 `document` 可用 |
+| `querySelector`          | `Element`        | -           | ✅               | `null`       | ⭐⭐⭐⭐⭐    | 单元素现代开发首选，支持局部查询    |
+| `getElementsByClassName` | `HTMLCollection` | 动态        | ❌               | 空集合       | ⭐⭐⭐      | 需要实时同步 DOM 时选用             |
+| `getElementsByTagName`   | `HTMLCollection` | 动态        | ❌               | 空集合       | ⭐⭐⭐      | 按标签批量获取，支持 `*` 通配       |
+| `getElementsByName`      | `NodeList`       | 动态        | ❌               | 空集合       | ⭐⭐       | 仅推荐表单同名元素场景              |
+| `querySelectorAll`       | `NodeList`       | 静态        | ✅               | 空集合       | ⭐⭐⭐⭐⭐    | 批量获取首选，遍历安全              |
+
+## 四、避坑与最佳实践
+
+### 1. 动态集合 vs 静态集合陷阱
+
+- `getElementsByClassName`、`getElementsByTagName`、`getElementsByName` 返回动态集合。
+
+  在循环遍历的同时修改 DOM（如删除节点），集合长度和内容会实时变化，极易造成元素跳过、死循环、索引异常。
+
+  ```javascript
+  // ❌ 危险示例：动态集合导致循环异常
+  const items = document.getElementsByClassName('item');
+  for (let i = 0; i < items.length; i++) {
+    items[i].remove(); // 删除后集合长度变化，i 递增，会漏删元素
+  }
+  ```
+
+- `querySelectorAll` 返回静态快照，遍历过程不受 DOM 改动影响，循环操作更安全。
+
+### 2. 类数组转真数组
+
+`HTMLCollection` 和 `NodeList` 不是数组，无法直接使用 `map`、`filter`、`reduce`。
+
+```javascript
+const nodeList = document.querySelectorAll('.item');
+const htmlCollection = document.getElementsByClassName('item');
+
+// 转为真数组的两种方式
+const arr1 = Array.from(nodeList);
+const arr2 = [...htmlCollection];
+```
+
+> 补充：`NodeList` 原生支持 `forEach`；`HTMLCollection` 不支持 `forEach`，需要转数组后再遍历。
+
+### 3. 性能建议
+
+1. 明确通过 id 获取元素，优先使用 `getElementById`，比 `querySelector('#id')` 更快，后者需要解析选择器字符串。
+
+2. 尽量缩小查询范围：不要每次都从 `document` 全局查询，可以挂载到父元素上局部查找。
+
+   ```javascript
+   const list = document.getElementById('list');
+   // 只在 list 内部查找，性能更好
+   const items = list.querySelectorAll('.item');
+   ```
+
+3. 大型文档避免过于复杂的 CSS 选择器，会拖慢 `querySelector` / `querySelectorAll` 查询速度。
+
+### 4. 现代开发推荐方案
+
+- 获取单个元素：优先 `querySelector`
+- 批量获取元素：优先 `querySelectorAll`
+- 极致性能、老项目兼容：保留 `getElementById`、`getElementsByClassName`
+- 表单同名元素：`getElementsByName`
+
+## 五、额外补充：获取特殊节点（拓展知识点）
+
+除了上面 6 种核心方法，还有常用获取文档特殊节点的属性，不属于“选择元素”但高频使用：
+
+- `document.documentElement`：获取 `<html>` 根元素
+- `document.head`：获取 `<head>` 元素
+- `document.body`：获取 `<body>` 元素
+

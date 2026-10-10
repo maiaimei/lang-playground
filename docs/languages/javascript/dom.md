@@ -1,36 +1,132 @@
-# DOM
+# DOM（文档对象模型）
 
-DOM 最常见指计算机领域的“文档对象模型”，是网页开发中的标准接口。
+## 一、DOM 基础概念
 
-‌基本含义‌：全称 Document Object Model，由 W3C 制定，用于表示 HTML 和 XML 文档结构。
-‌主要作用‌：把网页文档解析成一棵节点树，让程序能访问、修改页面的内容、结构和样式。
-‌使用场景‌：前端开发中常用 JavaScript 通过 DOM 操作页面元素，如获取标签、添加事件等。
+**DOM**（Document Object Model，文档对象模型）是 W3C 制定的标准接口，用于将 HTML 和 XML 文档表示为一个可编程的对象结构。
 
-DOM 里文档、元素、节点这三个概念，简单说就是从大到小、一层层包含的关系：文档是整棵树的根，节点是树上的每一个点，元素是节点里最常见、最常用的一种。
+| 维度         | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| **全称**     | Document Object Model                                        |
+| **制定者**   | W3C（万维网联盟）                                            |
+| **本质**     | 跨平台、语言无关的**接口规范**，不绑定 JavaScript            |
+| **核心思想** | 将文档解析为一棵**节点树**，程序可通过树形 API 访问、修改页面内容、结构和样式 |
 
-🌳 从"文档"开始理解
+> 💡 虽然 DOM 不是 JavaScript 独有的，但我们日常开发中几乎总是用 **JavaScript** 来操作 DOM，二者经常一起出现。
 
-文档（Document） 就是一个 HTML 页面本身，它是整棵 DOM 树的顶层根节点。 在 JavaScript 里用 `document` 对象来表示整个页面，所有操作都从它开始。
+------
 
-📦 节点（Node）是"一切"
+## 二、文档、节点、元素——从大到小的三层关系
 
-节点（Node） 是 DOM 树的基本组成单位，页面上所有东西都是节点：标签、文字、属性、注释，甚至标签之间的空格和换行，都是节点。 常用的节点类型有这几种：
+理解 DOM 最关键的一步，就是理清这三个概念的**包含关系**：
 
-- 元素节点（Element）：就是 `<div>`、`<p>` 这类 HTML 标签，`nodeType` 为 1。
-- 文本节点（Text）：标签里写的文字，比如 `<p>你好</p>` 里的"你好"，`nodeType` 为 3。
-- 属性节点（Attr）：标签上的属性，比如 `<img src="...">` 里的 `src`，`nodeType` 为 2。
-- 注释节点（Comment）：代码里的 `<!-- 注释 -->`，`nodeType` 为 8。
-- 文档节点（Document）：整棵树的根，`nodeType` 为 9。
+```
+文档（Document）  ← 整棵树的根
+  └─ 节点（Node）  ← 树上的每一个点（全集）
+       └─ 元素（Element）  ← 节点中最常用的一种（子集，即 HTML 标签）
+```
 
-🏷️ 元素（Element）是"标签"
+### 1. 🌳 文档（Document）
 
-元素（Element） 是节点的一种具体类型，特指 HTML 或 XML 里的标签，是开发中最常操作的对象。 关键区别在于：
+- **是什么**：整个 HTML 页面，DOM 树的**根节点**。
+- **怎么用**：在浏览器中通过全局对象 `document` 访问。
+- **地位**：所有 DOM 操作的**起点**，比如 `document.getElementById()`。
 
-- 节点是全集，元素是子集：所有元素都是节点，但节点不一定是元素。
-- 比如一个 `<p>` 标签里，`<p>` 本身是元素节点，里面的文字是文本节点，这俩都是节点，但只有 `<p>` 是元素。
+### 2. 📦 节点（Node）——DOM 的基本单位
 
-> 实际开发时，`childNodes` 拿到的子节点会包含文本、注释等所有类型；而 `children` 只会拿到元素节点。想要过滤掉空白文本，直接用 `children` 更省事。
+页面上**任何东西**都是节点，包括标签、文字、属性、注释，甚至空格和换行。
 
-# Reference
+**常用节点类型一览表：**
 
-[https://developer.mozilla.org/zh-CN/docs/Web/API](https://developer.mozilla.org/zh-CN/docs/Web/API)
+| 节点类型     | 说明             | `nodeType` 值 | 举例                       |
+| ------------ | ---------------- | :-----------: | -------------------------- |
+| **文档节点** | 整个文档         |       9       | `document`                 |
+| **元素节点** | HTML 标签        |       1       | `<div>`、`<p>`             |
+| **文本节点** | 标签内的文字内容 |       3       | `<p>你好</p>` 中的"你好"   |
+| **属性节点** | 标签上的属性     |       2       | `class="box"` 中的 `class` |
+| **注释节点** | HTML 注释        |       8       | `<!-- 注释 -->`            |
+
+> ⚠️ 属性节点虽然在 DOM 旧规范中算节点，但在实际 DOM 树结构中**不是子节点**，而是通过 `attributes` 属性集合访问。
+
+### 3. 🏷️ 元素（Element）——开发中最常打交道的对象
+
+- **本质**：节点（Node）的一个**子集**，特指 HTML/XML 标签。
+- 关键区别：
+  - ✅ 所有元素**都是**节点
+  - ❌ 但节点**不一定是**元素（比如文字、注释）
+- 实际影响：
+  - `parent.childNodes` → 返回**所有类型**的子节点（包含文本、注释等）
+  - `parent.children` → 只返回**元素节点**（自动过滤空白文本，更省事 ✅）
+
+------
+
+## 三、DOM 的常见使用场景
+
+| 场景         | 典型操作      | 示例                                                |
+| ------------ | ------------- | --------------------------------------------------- |
+| **内容修改** | 读写文本/HTML | `element.textContent`、`element.innerHTML`          |
+| **结构变更** | 增删改元素    | `document.createElement()`、`element.appendChild()` |
+| **样式控制** | 改 CSS        | `element.style.color = 'red'`、`element.classList`  |
+| **事件处理** | 响应用户行为  | `button.addEventListener('click', handler)`         |
+| **表单交互** | 获取/验证输入 | `input.value`、`form.submit()`                      |
+| **动态加载** | 按需渲染      | 结合 AJAX / Fetch 更新局部页面                      |
+
+------
+
+## 四、常见易混点 & 实用技巧
+
+### ❓ 为什么 `childNodes` 里有很多"空文本节点"？
+
+HTML 中标签之间的**空格、换行、缩进**都会被解析为**文本节点**。例如：
+
+```html
+<ul>
+  <li>Item</li>
+</ul>
+```
+
+`ul` 的 `childNodes` 会包含：换行文本节点 → `<li>` 元素节点 → 换行文本节点。
+
+**解决方案**：用 `children` 只拿元素，或用 `Array.from(nodes).filter(n => n.nodeType === 1)` 手动过滤。
+
+### ❓ `nodeType` 有什么用？
+
+在遍历 DOM 树时，常用 `nodeType` 判断节点种类，避免误操作文本节点：
+
+```javascript
+for (let node of parent.childNodes) {
+  if (node.nodeType === Node.ELEMENT_NODE) { // 1
+    console.log('这是一个元素：', node.tagName);
+  }
+}
+```
+
+### ❓ 属性节点到底算不算"子节点"？
+
+严格来说不算。`attributes` 是元素节点的**属性集合**，不是 `childNodes` 的一部分。访问方式：
+
+```javascript
+element.attributes          // 所有属性
+element.getAttribute('src') // 获取特定属性
+```
+
+------
+
+## 五、DOM 操作性能小贴士
+
+1. **减少重排（Reflow）**：批量修改样式时用 `class` 切换代替逐条改 `style`。
+2. **文档片段（DocumentFragment）**：离线操作节点，最后一次性插入 DOM。
+3. **缓存访问结果**：避免重复 `getElementById` / `querySelector`。
+4. **事件委托**：利用事件冒泡，把子元素事件绑定到父元素上，减少监听器数量。
+
+------
+
+## 六、参考与延伸阅读
+
+- **MDN Web API 文档**：https://developer.mozilla.org/zh-CN/docs/Web/API
+- **DOM 规范（W3C）**：https://www.w3.org/DOM/
+- **推荐学习路径**：DOM 基础 → 事件机制 → 性能优化 → 虚拟 DOM（如 React/Vue 中的概念）
+
+------
+
+> 📌 **一句话总结**：DOM 就是把网页变成一棵"对象树"，文档是树根，节点是树上的每个点，元素是其中代表 HTML 标签的那一类节点。掌握这三层关系，就掌握了 DOM 的钥匙。
+

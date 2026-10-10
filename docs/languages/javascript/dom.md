@@ -45,7 +45,9 @@
 | **属性节点** | 标签上的属性     |       2       | `class="box"` 中的 `class` |
 | **注释节点** | HTML 注释        |       8       | `<!-- 注释 -->`            |
 
-> ⚠️ 属性节点虽然在 DOM 旧规范中算节点，但在实际 DOM 树结构中**不是子节点**，而是通过 `attributes` 属性集合访问。
+> 文本节点是元素节点的子节点，表示元素中的文本内容。可以通过 `childNodes` 或 `firstChild` 等方法获取。
+>
+> 属性节点虽然在 DOM 旧规范中算节点，但在实际 DOM 树结构中**不是子节点**，而是通过 `attributes` 属性集合访问。
 
 ### 3. 🏷️ 元素（Element）——开发中最常打交道的对象
 
@@ -57,18 +59,58 @@
   - `parent.childNodes` → 返回**所有类型**的子节点（包含文本、注释等）
   - `parent.children` → 只返回**元素节点**（自动过滤空白文本，更省事 ✅）
 
+### 4. ✅ 核心继承链（最重要）
+
+```
+EventTarget
+  └── Node
+        ├── Document        // 整个文档
+        ├── CharacterData
+        │     ├── Text      // 文本节点
+        │     └── Comment   // 注释节点
+        └── Element         // 元素节点（标签）
+              ├── HTMLElement        // 所有 HTML 元素
+              │     ├── HTMLDivElement
+              │     ├── HTMLInputElement
+              │     ├── HTMLAnchorElement
+              │     └── ...
+              └── SVGElement         // SVG 元素
+```
+
+一句话：
+
+- **Node**：树里的任何东西
+- **Element**：Node 里“是标签”的那部分
+- **HTMLElement**：Element 里“是 HTML 标签”的那部分
+- **HTMLInputElement**：某个具体 HTML 标签
+
+**DOM API** = 通用文档模型
+
+**HTML DOM API** = 浏览器对 HTML 页面额外加的一层
+
+不需要记住所有接口，只要记住：
+
+| 我想做的事              | 用哪一层            |
+| ----------------------- | ------------------- |
+| 遍历树 / 判断节点类型   | Node                |
+| 操作标签、属性、class   | Element             |
+| 操作 HTML 元素样式/状态 | HTMLElement         |
+| 操作 input / a / img    | 具体 HTMLXxxElement |
+| 查文档、建节点          | Document            |
+| 学“HTML 相关 DOM”       | HTML DOM API        |
+
 ------
 
 ## 三、DOM 的常见使用场景
 
-| 场景         | 典型操作      | 示例                                                |
-| ------------ | ------------- | --------------------------------------------------- |
-| **内容修改** | 读写文本/HTML | `element.textContent`、`element.innerHTML`          |
-| **结构变更** | 增删改元素    | `document.createElement()`、`element.appendChild()` |
-| **样式控制** | 改 CSS        | `element.style.color = 'red'`、`element.classList`  |
-| **事件处理** | 响应用户行为  | `button.addEventListener('click', handler)`         |
-| **表单交互** | 获取/验证输入 | `input.value`、`form.submit()`                      |
-| **动态加载** | 按需渲染      | 结合 AJAX / Fetch 更新局部页面                      |
+| 场景         | 典型操作      | 示例                                                         |
+| ------------ | ------------- | ------------------------------------------------------------ |
+| **内容修改** | 读写文本/HTML | `element.textContent`、`element.innerText`、`element.innerHTML` |
+| **结构变更** | 增删改元素    | `document.createElement()`、`element.appendChild()`          |
+| **样式控制** | 改 CSS        | `element.style.color = 'red'`、`element.classList`           |
+| **事件处理** | 响应用户行为  | `button.addEventListener('click', handler)`                  |
+| **表单交互** | 获取/验证输入 | `input.value`、`form.submit()`                               |
+| **动态加载** | 按需渲染      | 结合 AJAX / Fetch 更新局部页面                               |
 
 ------
 
@@ -126,7 +168,5 @@ element.getAttribute('src') // 获取特定属性
 - **DOM 规范（W3C）**：https://www.w3.org/DOM/
 - **推荐学习路径**：DOM 基础 → 事件机制 → 性能优化 → 虚拟 DOM（如 React/Vue 中的概念）
 
-------
 
-> 📌 **一句话总结**：DOM 就是把网页变成一棵"对象树"，文档是树根，节点是树上的每个点，元素是其中代表 HTML 标签的那一类节点。掌握这三层关系，就掌握了 DOM 的钥匙。
 

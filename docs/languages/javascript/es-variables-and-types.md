@@ -280,3 +280,29 @@ Symbol 不是为了存数据，而是为了给“属性名”上一把不会撞�
 - 每次调用都返回**全新且唯一的值**
 - 描述（description）仅用于调试，不影响唯一性
 - 常用于对象属性键
+
+## 伪数组
+
+伪数组就是“长得像数组，但并不是真数组”的对象——它有 `length` 属性和数字索引，能通过下标取值，但没法直接用 `push`、`forEach` 这些数组方法。
+
+🧠 核心特征
+1. 有索引和长度：能通过 `arr` 取值，也有 `length` 属性，看起来和数组一样。
+2. 不是 Array 类型：它的原型链上没有 `Array.prototype`，所以 `Array.isArray()` 返回 `false`，本质是个普通对象。
+3. 不能直接用数组方法：调用 `forEach`、`push` 会直接报错，因为没有这些方法。
+
+> 简单理解：伪数组就像一个“仿冒品”，外形和真数组几乎一样，但内部构造不同——它没有继承数组的原型链，所以用不了数组自带的方法。
+
+📌 常见伪数组
+- arguments：函数内部获取所有参数的对象。
+- DOM 集合：`document.getElementsByTagName()` 返回的 `HTMLCollection`、`document.querySelectorAll()` 返回的 `NodeList`（部分现代浏览器已支持 `forEach`，但仍是伪数组）。
+- 字符串：也能按索引访问字符并带 `length`，但严格来说它属于原始类型，处理方式略有不同。
+
+🔄 转为真数组
+最常用两种方式：
+1. ES6 的 `Array.from()`：`let arr = Array.from(伪数组)`，最推荐，简洁直观。
+2. 扩展运算符：`let arr = [...伪数组]`，同样好用，但注意它不能展开没有 `Symbol.iterator` 的伪数组（比如 `arguments` 在部分老环境下可能不支持）。
+
+其他方法如 `Array.prototype.slice.call()` 也能转，但写法稍旧，现在基本用 `Array.from` 就够了。
+
+⚠️ 注意
+`length` 是只读的，不能通过修改它来增删元素；遍历时用 `for` 循环没问题，但别直接调数组方法，转成真数组再操作最省心。
